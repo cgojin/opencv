@@ -1,4 +1,5 @@
 # --- FFMPEG ---
+#[[
 OCV_OPTION(OPENCV_FFMPEG_ENABLE_LIBAVDEVICE "Include FFMPEG/libavdevice library support." OFF
   VISIBLE_IF WITH_FFMPEG)
 
@@ -101,6 +102,26 @@ endif()
 #==================================
 unset(_required_ffmpeg_libraries)
 unset(_used_ffmpeg_libraries)
+]]
+
+if(DEFINED ENV{FFMPEG_KIT})
+  set(HAVE_FFMPEG ON)
+  set(FFMPEG_LIBRARIES
+    $ENV{FFMPEG_KIT}/android-${ANDROID_ABI}/ffmpeg/lib/libavcodec.a
+    $ENV{FFMPEG_KIT}/android-${ANDROID_ABI}/ffmpeg/lib/libavformat.a
+    $ENV{FFMPEG_KIT}/android-${ANDROID_ABI}/ffmpeg/lib/libavutil.a
+    $ENV{FFMPEG_KIT}/android-${ANDROID_ABI}/ffmpeg/lib/libswscale.a
+    $ENV{FFMPEG_KIT}/android-${ANDROID_ABI}/ffmpeg/lib/libswresample.a
+  )
+  set(FFMPEG_INCLUDE_DIRS
+    $ENV{FFMPEG_KIT}/android-${ANDROID_ABI}/ffmpeg/include
+  )
+  # FIX relocation xxx cannot be used against symbol 'ff_cos_32'; recompile with -fPIC
+  set(CMAKE_C_FLAGS "-Wl,-Bsymbolic ${CMAKE_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "-Wl,-Bsymbolic ${CMAKE_CXX_FLAGS}")
+endif()
+
+message(STATUS "FFMPEG_LIBRARIES=${FFMPEG_LIBRARIES}\nFFMPEG_INCLUDE_DIRS=${FFMPEG_INCLUDE_DIRS}")
 
 if(HAVE_FFMPEG_WRAPPER)
   ocv_add_external_target(ffmpeg "" "" "HAVE_FFMPEG_WRAPPER")
